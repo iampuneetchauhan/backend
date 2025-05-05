@@ -14,7 +14,7 @@ const LeaveSchema = new Schema({
     required: true,
   },
   file: {
-    type: String, // Assuming it's a file URL or file path for the uploaded document
+    type: String, 
     required: true,
   },
   date: {
