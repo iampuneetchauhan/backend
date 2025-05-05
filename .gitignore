@@ -1,0 +1,26 @@
+# Node modules (heavy & regenerate ho sakta)
+node_modules/
+
+# Env file (sensitive credentials)
+.env
+
+# Log files
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# OS junk files
+.DS_Store
+Thumbs.db
+
+# Uploaded files (agar user uploads hote hain jaise images etc.)
+uploads/
+
+# Coverage reports (agar testing hai)
+coverage/
+
+# Production build (agar bana rahe ho)
+dist/
+
+# Misc (optional but achha hai)
+*.log
