@@ -7,8 +7,7 @@ const LeaveSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ["approved", "pending", "rejected"], // Assuming status can be "approved", "pending", or "rejected"
-    required: true,
+    enum: ["approved", "pending", "rejected"],
   },
   reason: {
     type: String,

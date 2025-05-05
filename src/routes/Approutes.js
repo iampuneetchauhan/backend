@@ -68,10 +68,6 @@ router.get("/getcandidates",async(req,res)=>{
   }
 })
 
-
-
-
-// Register user
 router.post("/register", async(req,res)=>{
   const {name,email,password} = req.body
   try{
@@ -84,7 +80,7 @@ catch(E){
   console.log("there is some error while registering user:", E);
 }
 })
-// Login user
+
 router.post("/Login", async (req, res) => {
   const { email, password } = req.body;
   
@@ -113,29 +109,21 @@ router.post("/Login", async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 });
-// getting all posts
-router.get("/getusers", async(req, res) => {
-  try{
-  const posts = await CandidateModel.find()
-  return res.status(200).json(posts);
-  }
-  catch(E){
-    console.log("error while getting all the posts");
-  }
-});
 
 router.get("/getAttendance", async (req, res) => {
   try {
-    const attendanceRecords = await AttendanceModel.find().populate("candidateId", "fullName");
-
-    if (!attendanceRecords || attendanceRecords.length === 0) {
-      return res.status(404).json({ message: "No attendance records found" });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: attendanceRecords,
-    });
+    const candidate = await CandidateModel.find()
+      const dummyAttendance = candidate.map(candidate => ({
+        fullName: candidate.fullName,
+        position: candidate.position,
+        task: "Dashboard feature functionality",
+        status: "present",
+      }));
+      return res.status(200).json({
+        success: true,
+        data:dummyAttendance,
+      });
+  
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Server error" });
@@ -143,7 +131,7 @@ router.get("/getAttendance", async (req, res) => {
 });
 
 router.post("/addAttendance", async (req, res) => {
-  const { candidateId, status } = req.body; // Status is either 'present' or 'absent'
+  const { candidateId, status } = req.body; 
 
   try {
     if (!candidateId || !status) {
@@ -168,44 +156,43 @@ router.post("/addAttendance", async (req, res) => {
   }
 });
 
-router.post("/addLeave", async (req, res) => {
-  const { fullName, status, reason, file, date } = req.body; // All fields from Leave schema
 
+router.post('/addLeave', upload.single('file'), async (req, res) => {
   try {
-    // Validate that all required fields are provided
-    if (!fullName || !status || !reason || !file || !date) {
-      return res.status(400).json({ message: "All fields are required" });
+    const { fullName, designation, reason, leaveDate } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'File is required and must be a .docx file' });
     }
 
-    // Create a new leave request record
+    if (!fullName || !designation || !reason || !leaveDate) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
     const newLeaveRequest = new LeaveModel({
       fullName,
-      status,
+      designation,
       reason,
-      file,
-      date,
+      file: req.file.path,
+      date:leaveDate,
     });
 
-    // Save the leave request to the database
     await newLeaveRequest.save();
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
-      message: "Leave request added successfully",
+      message: 'Leave request added successfully',
       data: newLeaveRequest,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error('Error in /addLeave:', error.message);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
 router.get("/getLeaves", async (req, res) => {
   try {
-    // Retrieve all leave requests from the database
     const leaves = await LeaveModel.find();
-
-    // Return the leave data as a response
     res.status(200).json({
       success: true,
       message: "Leave requests retrieved successfully",
@@ -216,4 +203,37 @@ router.get("/getLeaves", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+router.get('/downloadResume/:filename', async (req, res) => {
+  const { filename } = req.params;
+
+  try {
+    const filePath = `./uploads/resumes/${filename}`;
+    res.download(filePath, filename, (err) => {
+      if (err) {
+        console.error('Error downloading resume:', err);
+        return res.status(500).json({ success: false, message: 'Error downloading resume' });
+      }
+    });
+  } catch (error) {
+    console.error('Error in /downloadResume:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+router.get('/downloadLeaveDocument/:filename', async (req, res) => {
+  const { filename } = req.params;
+
+  try {
+    const filePath = `./uploads/leaveDocuments/${filename}`;
+    res.download(filePath, filename, (err) => {
+      if (err) {
+        console.error('Error downloading leave document:', err);
+        return res.status(500).json({ success: false, message: 'Error downloading leave document' });
+      }
+    });
+  } catch (error) {
+    console.error('Error in /downloadLeaveDocument:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 export default router;
