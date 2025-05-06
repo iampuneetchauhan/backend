@@ -6,7 +6,9 @@ import upload from "../config/multer.config.js";
 import LeaveModel from "../model/login/Document.model.js";
 import AttendanceModel from "../model/Attendence.model.js";
 const router = express.Router();
-
+router.get("/", function (req,res) {
+  res.send("Hello from backend")
+  })
 
 router.post("/addCandidate", upload.single("resume"), async (req, res) => {
   console.log("File:", req.file);
